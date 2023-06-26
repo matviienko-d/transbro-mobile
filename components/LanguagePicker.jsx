@@ -1,7 +1,6 @@
 import {useState} from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import styled from "styled-components/native";
-import {useFonts} from "expo-font";
 
 const LanguageBar = styled.View`
   justifyContent: space-between;
