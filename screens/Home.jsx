@@ -1,12 +1,13 @@
 import {TextInput, View} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import axios from "axios";
-import {LIBRE_BASE_URL} from "../configs/environment";
+import {API_VERSION, LIBRE_BASE_URL, MICROSOFT_TRANSLATOR_URL} from "../configs/environment";
 import {useCallback, useEffect, useState} from "react";
 import styled from "styled-components/native";
 import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/LanguagePicker";
 import debounce from "lodash.debounce";
+import {convertLanguageItemsToList} from "../utils/language-items";
 
 const Logo = styled.Text`
   fontSize: 25px;
@@ -23,6 +24,7 @@ const Header = styled.View`
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: rgba(158, 158, 158, .5);
+  z-index: 100;
 `;
 
 const MainView = styled.View`
@@ -35,6 +37,7 @@ const MainView = styled.View`
 const MainContent = styled.View`
   width: 100%;
   height: calc(100% - 136.5px);
+  z-index: 0;
 `;
 
 const InputToTranslate = styled.TextInput`
@@ -48,7 +51,7 @@ const InputToTranslate = styled.TextInput`
 `;
 
 export const Home = () => {
-    const [languageItems, setLanguageItems] = useState();
+    const [languageItems, setLanguageItems] = useState([]);
     const [textToTranslate, setTextToTranslate] = useState('');
     const [translatedText, setTranslatedText] = useState('');
     const [fontsLoaded] = useFonts({
@@ -57,9 +60,17 @@ export const Home = () => {
     });
 
     const fetchLanguageItems = () => {
-        axios.get(`${LIBRE_BASE_URL}/languages`)
-            .then(({data}) => {
-                setLanguageItems(data);
+        axios.get(`${MICROSOFT_TRANSLATOR_URL}/languages`, {
+            params: {
+                'api-version': API_VERSION
+            },
+            headers: {
+                'Ocp-Apim-Subscription-Key': 'b395cb02cea349fe94a98f2e43d4ffb4',
+                'Ocp-Apim-Subscription-Region': 'westeurope',
+            },
+        })
+            .then(({data: { translation }}) => {
+                setLanguageItems(convertLanguageItemsToList(translation));
             })
             .catch((error) => {
                 console.error(error);

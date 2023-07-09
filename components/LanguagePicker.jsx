@@ -43,10 +43,6 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setInputLanguageValue}
                     setItems={setItems}
                     onOpen={onInputLanguageOpen}
-                    schema={{
-                        label: 'name',
-                        value: 'code'
-                    }}
                 />
             </DropdownItem>
             <DropdownItem>
@@ -62,10 +58,6 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setOutputLanguageValue}
                     setItems={setItems}
                     onOpen={onOutputLanguageOpen}
-                    schema={{
-                        label: 'name',
-                        value: 'code'
-                    }}
                 />
             </DropdownItem>
         </LanguageBar>
