@@ -2,10 +2,11 @@ import {TextInput, View} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import axios from "axios";
 import {LIBRE_BASE_URL} from "../configs/environment";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import styled from "styled-components/native";
 import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/LanguagePicker";
+import debounce from "lodash.debounce";
 
 const Logo = styled.Text`
   fontSize: 25px;
@@ -19,7 +20,6 @@ const Header = styled.View`
   padding: 20px 12px;
   width: 100%;
   background-color: #fafafa;
-  border-bottom: 1px solid rgba(158, 158, 158, .5);
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: rgba(158, 158, 158, .5);
@@ -50,10 +50,11 @@ const InputToTranslate = styled.TextInput`
 export const Home = () => {
     const [languageItems, setLanguageItems] = useState();
     const [textToTranslate, setTextToTranslate] = useState('');
+    const [translatedText, setTranslatedText] = useState('');
     const [fontsLoaded] = useFonts({
         'Raleway-Bold': require('../assets/fonts/Raleway-Bold.ttf'),
         'Bitter-Regular': require('../assets/fonts/Bitter-Regular.ttf')
-    })
+    });
 
     const fetchLanguageItems = () => {
         axios.get(`${LIBRE_BASE_URL}/languages`)
@@ -64,6 +65,28 @@ export const Home = () => {
                 console.error(error);
             })
     }
+
+    const handleTranslateInputChange = (textToTranslate) => {
+        setTextToTranslate(textToTranslate)
+        debouncedTextTranslate(textToTranslate);
+    }
+
+    const debouncedTextTranslate = useCallback(
+        debounce((textToTranslate) => {
+            axios.post(`${LIBRE_BASE_URL}/translate`,
+                {
+                    q: textToTranslate,
+                    source: "en",
+                    target: "es",
+                    format: "text",
+                })
+                .catch((error) => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    setTranslatedText(`Translated text ${Math.floor(Math.random() * 100)}`);
+                })
+    }, 500), []);
 
     useEffect(fetchLanguageItems, []);
 
@@ -89,9 +112,8 @@ export const Home = () => {
                 <InputToTranslate
                     multiline={true}
                     value={textToTranslate}
-                    onChangeText={(userName) => setTextToTranslate(userName)}
+                    onChangeText={handleTranslateInputChange}
                     placeholder={'Translate...'}
-                    /*placeholderStyle={{ textAlignVertical: "top", textAlign: 'start' }}*/
                 />
             </MainContent>
             <StatusBar style="auto"/>
