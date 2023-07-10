@@ -1,7 +1,7 @@
-import {useState} from "react";
+import {useContext, useState} from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import styled from "styled-components/native";
-import {useFonts} from "expo-font";
+import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 
 const LanguageBar = styled.View`
   justifyContent: space-between;
@@ -17,8 +17,7 @@ const DropdownItem = styled.View`
 export const LanguagePicker = ({languageItems}) => {
     const [inputLanguageOpen, setInputLanguageOpen] = useState(false);
     const [outputLanguageOpen, setOutputLanguageOpen] = useState(false);
-    const [inputLanguageValue, setInputLanguageValue] = useState('uk');
-    const [outputLanguageValue, setOutputLanguageValue] = useState('en');
+    const [inputLanguageValue, setInputLanguageValue, outputLanguageValue, setOutputLanguageValue] = useContext(activeLanguagesContext);
     const [items, setItems] = useState([...languageItems]);
 
     const onInputLanguageOpen = () => {
@@ -44,10 +43,6 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setInputLanguageValue}
                     setItems={setItems}
                     onOpen={onInputLanguageOpen}
-                    schema={{
-                        label: 'name',
-                        value: 'code'
-                    }}
                 />
             </DropdownItem>
             <DropdownItem>
@@ -63,10 +58,6 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setOutputLanguageValue}
                     setItems={setItems}
                     onOpen={onOutputLanguageOpen}
-                    schema={{
-                        label: 'name',
-                        value: 'code'
-                    }}
                 />
             </DropdownItem>
         </LanguageBar>
