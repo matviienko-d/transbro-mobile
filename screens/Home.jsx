@@ -1,4 +1,4 @@
-import {View} from "react-native";
+import {ActivityIndicator, View} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import axios from "axios";
 import {API_VERSION, MICROSOFT_TRANSLATOR_URL} from "../configs/environment";
@@ -42,6 +42,10 @@ const MainContent = styled.View`
   z-index: 0;
 `;
 
+const SpinnerView = styled.View`
+  padding: 20px 0 12px 0;
+`;
+
 const InputToTranslate = styled.TextInput`
   width: 100%;
   height: calc((100% - 136.5px) / 2);
@@ -68,6 +72,7 @@ const TranslationResultText = styled.Text`
 `;
 
 export const Home = () => {
+    const [isLoading, setLoading] = useState(false);
     const [languageItems, setLanguageItems] = useState([]);
     const [textToTranslate, setTextToTranslate] = useState('');
     const [translatedText, setTranslatedText] = useState('');
@@ -96,6 +101,7 @@ export const Home = () => {
     }
 
     const translateText = (textToTranslate) => {
+        setLoading(true);
         axios.post(`${MICROSOFT_TRANSLATOR_URL}/translate`,
             [
                 {
@@ -114,6 +120,7 @@ export const Home = () => {
                 },
             })
             .then(({data}) => {
+                setLoading(false);
                 setTranslatedText(data[0].translations[0].text);
             })
             .catch((error) => {
@@ -162,9 +169,19 @@ export const Home = () => {
                     onChangeText={handleTranslateInputChange}
                     placeholder={'Translate...'}
                 />
-                <TranslationResultText
-                    isEmpty={!!translatedText}
-                >{translatedText}</TranslationResultText>
+                { isLoading &&
+                    <SpinnerView>
+                        <ActivityIndicator
+                            color='#9E9E9E'
+                            size="large"
+                        />
+                    </SpinnerView>
+                }
+                { !isLoading &&
+                    <TranslationResultText
+                        isEmpty={!!translatedText}
+                    >{translatedText}</TranslationResultText>
+                }
             </MainContent>
             <StatusBar style="auto"/>
         </MainView>
