@@ -1,7 +1,7 @@
 
 import { createContext, useState } from 'react';
 
-export const activeLanguagesContext = createContext();
+export const activeLanguagesContext = createContext(null);
 
 const ActiveLanguagesProvider = (props) => {
     const [inputLanguageValue, setInputLanguageValue] = useState('uk');

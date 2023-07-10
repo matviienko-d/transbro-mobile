@@ -1,7 +1,7 @@
 import {useContext, useState} from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import styled from "styled-components/native";
-import {activeLanguagesContext, userDetailsContext} from "../providers/ActiveLanguagesProvider";
+import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 
 const LanguageBar = styled.View`
   justifyContent: space-between;
@@ -58,9 +58,6 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setOutputLanguageValue}
                     setItems={setItems}
                     onOpen={onOutputLanguageOpen}
-                    /*onChangeValue={(value) => {
-                        onOutputLanguageChange(value)
-                    }}*/
                 />
             </DropdownItem>
         </LanguageBar>

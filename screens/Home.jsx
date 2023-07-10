@@ -2,13 +2,13 @@ import {View} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import axios from "axios";
 import {API_VERSION, MICROSOFT_TRANSLATOR_URL} from "../configs/environment";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import styled from "styled-components/native";
 import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/LanguagePicker";
 import debounce from "lodash.debounce";
 import {convertLanguageItemsToList} from "../utils/language-items";
-import ActiveLanguagesProvider from "../providers/ActiveLanguagesProvider";
+import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 
 const Logo = styled.Text`
   fontSize: 25px;
@@ -71,7 +71,7 @@ export const Home = () => {
     const [languageItems, setLanguageItems] = useState([]);
     const [textToTranslate, setTextToTranslate] = useState('');
     const [translatedText, setTranslatedText] = useState('');
-    const [outputLanguageParam, setOutputLanguageParam] = useState('en');
+    const [inputLanguageValue, setInputLanguageValue, outputLanguageValue, setOutputLanguageValue] = useContext(activeLanguagesContext);
     const [fontsLoaded] = useFonts({
         'Raleway-Bold': require('../assets/fonts/Raleway-Bold.ttf'),
         'Bitter-Regular': require('../assets/fonts/Bitter-Regular.ttf')
@@ -95,6 +95,32 @@ export const Home = () => {
             })
     }
 
+    const translateText = (textToTranslate) => {
+        axios.post(`${MICROSOFT_TRANSLATOR_URL}/translate`,
+            [
+                {
+                    text: textToTranslate,
+                },
+            ],
+            {
+                params: {
+                    'api-version': API_VERSION,
+                    to: outputLanguageValue,
+                },
+                headers: {
+                    'Ocp-Apim-Subscription-Key': 'b395cb02cea349fe94a98f2e43d4ffb4',
+                    'Ocp-Apim-Subscription-Region': 'westeurope',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(({data}) => {
+                setTranslatedText(data[0].translations[0].text);
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+    }
+
     const handleTranslateInputChange = (textToTranslate) => {
         setTextToTranslate(textToTranslate)
         debouncedTextTranslate(textToTranslate);
@@ -102,69 +128,45 @@ export const Home = () => {
 
     const debouncedTextTranslate = useCallback(
         debounce((textToTranslate) => {
-            axios.post(`${MICROSOFT_TRANSLATOR_URL}/translate`,
-                [
-                    {
-                        text: textToTranslate,
-                    },
-                ],
-                {
-                    params: {
-                        'api-version': API_VERSION,
-                        to: outputLanguageParam,
-                    },
-                    headers: {
-                        'Ocp-Apim-Subscription-Key': 'b395cb02cea349fe94a98f2e43d4ffb4',
-                        'Ocp-Apim-Subscription-Region': 'westeurope',
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(({data}) => {
-                    setTranslatedText(data[0].translations[0].text);
-                })
-                .catch((error) => {
-                    console.error(error);
-                })
-        }, 500), [outputLanguageParam]);
+            translateText(textToTranslate);
+        }, 500), [outputLanguageValue]);
 
     useEffect(fetchLanguageItems, []);
+
+    useEffect(() => {
+        translateText(textToTranslate);
+    }, [inputLanguageValue, outputLanguageValue]);
 
     if (!fontsLoaded) {
         console.error('Fonts are not loaded!');
     }
 
     return (
-        <ActiveLanguagesProvider>
-            <MainView>
-                <Header>
-                    <Logo>transbro</Logo>
-                    <View>
-                        {
-                            languageItems?.length &&
-                            <LanguagePicker
-                                languageItems={languageItems}
-                                onOutputLanguageChange={(outputParam) => {
-                                    setOutputLanguageParam(outputParam);
-                                    // TODO: translate text on picker update, try with useEffect(trigger debounce? or search?) on input/output language change Ex. useEffect()
-                                }}
-                            >
-                            </LanguagePicker>
-                        }
-                    </View>
-                </Header>
-                <MainContent>
-                    <InputToTranslate
-                        multiline={true}
-                        value={textToTranslate}
-                        onChangeText={handleTranslateInputChange}
-                        placeholder={'Translate...'}
-                    />
-                    <TranslationResultText
-                        isEmpty={!!translatedText}
-                    >{translatedText}</TranslationResultText>
-                </MainContent>
-                <StatusBar style="auto"/>
-            </MainView>
-        </ActiveLanguagesProvider>
+        <MainView>
+            <Header>
+                <Logo>transbro</Logo>
+                <View>
+                    {
+                        languageItems?.length &&
+                        <LanguagePicker
+                            languageItems={languageItems}
+                        >
+                        </LanguagePicker>
+                    }
+                </View>
+            </Header>
+            <MainContent>
+                <InputToTranslate
+                    multiline={true}
+                    value={textToTranslate}
+                    onChangeText={handleTranslateInputChange}
+                    placeholder={'Translate...'}
+                />
+                <TranslationResultText
+                    isEmpty={!!translatedText}
+                >{translatedText}</TranslationResultText>
+            </MainContent>
+            <StatusBar style="auto"/>
+        </MainView>
     );
 }
