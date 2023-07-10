@@ -1,10 +1,9 @@
-import {ActivityIndicator, View} from "react-native";
+import {ActivityIndicator, SafeAreaView, View, TouchableWithoutFeedback, Keyboard} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import axios from "axios";
 import {API_VERSION, MICROSOFT_TRANSLATOR_URL} from "../configs/environment";
 import {useCallback, useContext, useEffect, useState} from "react";
 import styled from "styled-components/native";
-import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/LanguagePicker";
 import debounce from "lodash.debounce";
 import {convertLanguageItemsToList} from "../utils/language-items";
@@ -37,7 +36,6 @@ const MainView = styled.View`
 
 const MainContent = styled.View`
   width: 100%;
-  height: calc(100% - 136.5px);
   overflow-y: scroll;
   z-index: 0;
 `;
@@ -48,14 +46,14 @@ const SpinnerView = styled.View`
 
 const InputToTranslate = styled.TextInput`
   width: 100%;
-  height: calc((100% - 136.5px) / 2);
+  min-height: 350px;
   padding: 10px 12px;
-  text-align: start;
+  text-align: left;
   fontFamily: "Bitter-Regular";
   font-size: 18px;
   font-weight: 500;
   border-bottom-width: 1px;
-  border-bottom-style: solid;
+  borderBottomStyle: 'solid';
   border-bottom-color: rgba(158, 158, 158, .5);
 `;
 
@@ -77,10 +75,6 @@ export const Home = () => {
     const [textToTranslate, setTextToTranslate] = useState('');
     const [translatedText, setTranslatedText] = useState('');
     const [inputLanguageValue, setInputLanguageValue, outputLanguageValue, setOutputLanguageValue] = useContext(activeLanguagesContext);
-    const [fontsLoaded] = useFonts({
-        'Raleway-Bold': require('../assets/fonts/Raleway-Bold.ttf'),
-        'Bitter-Regular': require('../assets/fonts/Bitter-Regular.ttf')
-    });
 
     const fetchLanguageItems = () => {
         axios.get(`${MICROSOFT_TRANSLATOR_URL}/languages`, {
@@ -144,46 +138,50 @@ export const Home = () => {
         translateText(textToTranslate);
     }, [inputLanguageValue, outputLanguageValue]);
 
-    if (!fontsLoaded) {
+/*    if (!fontsLoaded) {
         console.error('Fonts are not loaded!');
-    }
+    }*/
 
     return (
-        <MainView>
-            <Header>
-                <Logo>transbro</Logo>
-                <View>
-                    {
-                        languageItems?.length &&
-                        <LanguagePicker
-                            languageItems={languageItems}
-                        >
-                        </LanguagePicker>
-                    }
-                </View>
-            </Header>
-            <MainContent>
-                <InputToTranslate
-                    multiline={true}
-                    value={textToTranslate}
-                    onChangeText={handleTranslateInputChange}
-                    placeholder={'Translate...'}
-                />
-                { isLoading &&
-                    <SpinnerView>
-                        <ActivityIndicator
-                            color='#9E9E9E'
-                            size="large"
+        <SafeAreaView style={{flex: 1}}>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <MainView>
+                    <Header>
+                        <Logo>transbro</Logo>
+                        <View>
+                            {
+                                languageItems?.length ?
+                                    <LanguagePicker
+                                        languageItems={languageItems}
+                                    >
+                                    </LanguagePicker> : null
+                            }
+                        </View>
+                    </Header>
+                    <MainContent>
+                        <InputToTranslate
+                            multiline={true}
+                            value={textToTranslate}
+                            onChangeText={handleTranslateInputChange}
+                            placeholder={'Translate...'}
                         />
-                    </SpinnerView>
-                }
-                { !isLoading &&
-                    <TranslationResultText
-                        isEmpty={!!translatedText}
-                    >{translatedText}</TranslationResultText>
-                }
-            </MainContent>
-            <StatusBar style="auto"/>
-        </MainView>
+                        {isLoading ?
+                            <SpinnerView>
+                                <ActivityIndicator
+                                    color='#9E9E9E'
+                                    size="large"
+                                />
+                            </SpinnerView> : null
+                        }
+                        {!isLoading ?
+                            <TranslationResultText
+                                isEmpty={!!translatedText}
+                            >{translatedText}</TranslationResultText> : null
+                        }
+                    </MainContent>
+                    <StatusBar style="auto"/>
+                </MainView>
+            </TouchableWithoutFeedback>
+        </SafeAreaView>
     );
 }
