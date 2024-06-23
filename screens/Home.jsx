@@ -9,6 +9,7 @@ import debounce from "lodash.debounce";
 import {convertLanguageItemsToList} from "../utils/language-items";
 import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 import {LANGUAGES_ITEMS_LIST} from "../mocks/languages";
+import Feather from '@expo/vector-icons/Feather';
 
 const Logo = styled.Text`
     fontSize: 25px;
@@ -45,17 +46,23 @@ const SpinnerView = styled.View`
     padding: 20px 0 12px 0;
 `;
 
-const InputToTranslate = styled.TextInput`
+const InpurArea = styled.View`
+    position: relative;
     width: 100%;
     min-height: 350px;
+    border-bottom-width: 1px;
+    borderBottomStyle: 'solid';
+    border-bottom-color: rgba(158, 158, 158, .5);
+`;
+
+const InputToTranslate = styled.TextInput`
+    width: 100%;
+    height: 100%;
     padding: 10px 12px;
     text-align: left;
     fontFamily: "Bitter-Regular";
     font-size: 18px;
     font-weight: 500;
-    border-bottom-width: 1px;
-    borderBottomStyle: 'solid';
-    border-bottom-color: rgba(158, 158, 158, .5);
 `;
 
 const TranslationResultText = styled.Text`
@@ -68,6 +75,14 @@ const TranslationResultText = styled.Text`
     border-bottom-width: ${props => props.isEmpty ? '1px' : '0'};
     border-bottom-style: solid;
     border-bottom-color: rgba(158, 158, 158, .5);
+`;
+
+const RemoveInputTextIcon = styled.View`
+    cursor: pointer;
+    position: absolute;
+    width: max-content;
+    right: 15px;
+    top: 15px;
 `;
 
 export const Home = () => {
@@ -146,6 +161,11 @@ export const Home = () => {
             translateText(textToTranslate);
         }, 500), [outputLanguageValue]);
 
+    const removeEnteredText = () => {
+        setTextToTranslate('');
+        debouncedTextTranslate('');
+    }
+
     useEffect(fetchLanguageItems, []);
 
     useEffect(() => {
@@ -172,12 +192,17 @@ export const Home = () => {
                     </View>
                 </Header>
                 <MainContent>
-                    <InputToTranslate
-                        multiline={true}
-                        value={textToTranslate}
-                        onChangeText={handleTranslateInputChange}
-                        placeholder={'Translate...'}
-                    />
+                    <InpurArea>
+                        <RemoveInputTextIcon>
+                            <Feather name="x" size={24} color="black" onPress={removeEnteredText} />
+                        </RemoveInputTextIcon>
+                        <InputToTranslate
+                            multiline={true}
+                            value={textToTranslate}
+                            onChangeText={handleTranslateInputChange}
+                            placeholder={'Translate...'}
+                        />
+                    </InpurArea>
                     {isLoading ?
                         <SpinnerView>
                             <ActivityIndicator
@@ -189,11 +214,6 @@ export const Home = () => {
                             isEmpty={!!translatedText}
                         >{translatedText}</TranslationResultText>
                     }
-                    {/*{!isLoading ?
-                        <TranslationResultText
-                            isEmpty={!!translatedText}
-                        >{translatedText}</TranslationResultText> : null
-                    }*/}
                 </MainContent>
                 <StatusBar style="auto"/>
             </MainView>
