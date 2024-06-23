@@ -65,6 +65,11 @@ const InputToTranslate = styled.TextInput`
     font-weight: 500;
 `;
 
+const OutputArea = styled.View`
+    position: relative;
+    width: 100%;
+`;
+
 const TranslationResultText = styled.Text`
     fontSize: 18px;
     fontFamily: "Raleway-Bold";
@@ -77,7 +82,7 @@ const TranslationResultText = styled.Text`
     border-bottom-color: rgba(158, 158, 158, .5);
 `;
 
-const RemoveInputTextIcon = styled.View`
+const InputTextActionIcon = styled.View`
     cursor: pointer;
     position: absolute;
     width: max-content;
@@ -193,9 +198,9 @@ export const Home = () => {
                 </Header>
                 <MainContent>
                     <InpurArea>
-                        <RemoveInputTextIcon>
-                            <Feather name="x" size={24} color="black" onPress={removeEnteredText} />
-                        </RemoveInputTextIcon>
+                        <InputTextActionIcon>
+                            <Feather name="x" size={24} color="black" onPress={removeEnteredText}/>
+                        </InputTextActionIcon>
                         <InputToTranslate
                             multiline={true}
                             value={textToTranslate}
@@ -210,9 +215,18 @@ export const Home = () => {
                                 size="large"
                             />
                         </SpinnerView>
-                        : <TranslationResultText
-                            isEmpty={!!translatedText}
-                        >{translatedText}</TranslationResultText>
+                        : <OutputArea>
+                            {
+                                translatedText
+                                    ? <InputTextActionIcon>
+                                        <Feather name="copy" size={24} color="black" />
+                                    </InputTextActionIcon>
+                                    : null
+                            }
+                            <TranslationResultText
+                                isEmpty={!!translatedText}
+                            >{translatedText}</TranslationResultText>
+                        </OutputArea>
                     }
                 </MainContent>
                 <StatusBar style="auto"/>
