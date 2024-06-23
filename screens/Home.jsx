@@ -10,6 +10,7 @@ import {convertLanguageItemsToList} from "../utils/language-items";
 import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 import {LANGUAGES_ITEMS_LIST} from "../mocks/languages";
 import Feather from '@expo/vector-icons/Feather';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const Logo = styled.Text`
     fontSize: 25px;
@@ -171,6 +172,10 @@ export const Home = () => {
         debouncedTextTranslate('');
     }
 
+    const copyTranslatedText = () => {
+        Clipboard.setString(translatedText);
+    }
+
     useEffect(fetchLanguageItems, []);
 
     useEffect(() => {
@@ -219,7 +224,7 @@ export const Home = () => {
                             {
                                 translatedText
                                     ? <InputTextActionIcon>
-                                        <Feather name="copy" size={24} color="black" />
+                                        <Feather name="copy" size={24} color="black" onPress={copyTranslatedText}/>
                                     </InputTextActionIcon>
                                     : null
                             }
