@@ -205,9 +205,13 @@ export const Home = () => {
                 </Header>
                 <MainContent>
                     <InpurArea>
-                        <InputTextActionIcon>
-                            <Feather name="x" size={24} color="black" onPress={removeEnteredText}/>
-                        </InputTextActionIcon>
+                        {
+                            textToTranslate
+                                ? <InputTextActionIcon>
+                                    <Feather name="x" size={24} color="black" onPress={removeEnteredText}/>
+                                </InputTextActionIcon>
+                                : null
+                        }
                         <InputToTranslate
                             multiline={true}
                             value={textToTranslate}
