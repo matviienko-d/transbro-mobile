@@ -2,6 +2,7 @@ import {useContext, useState} from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import styled from "styled-components/native";
 import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
+import {RECENT_INPUT_LANGUAGES} from "../configs/language-picker";
 
 const LanguageBar = styled.View`
   justifyContent: space-between;
@@ -28,10 +29,48 @@ export const LanguagePicker = ({languageItems}) => {
         setInputLanguageOpen(false);
     };
 
+    const onSelectItem = (languageItem) => {
+        const storedRecentlyUsed = JSON.parse(localStorage.getItem(RECENT_INPUT_LANGUAGES))
+        const langItems = [];
+        !storedRecentlyUsed?.length && langItems.push({label: 'Recent', value: 'recent'});
+        const recentlyUsed = [
+            ...new Set([
+                languageItem.value, ...(storedRecentlyUsed ?? [])
+            ])
+        ]
+            .slice(0, 3)
+
+        langItems.push(...items.map((languageItem) => {
+            if (!languageItem.parent) {
+                return languageItem;
+            }
+
+            if (recentlyUsed.includes(languageItem.value)) {
+                return {
+                    ...languageItem,
+                    parent: 'recent'
+                }
+            }
+
+            return {
+                ...languageItem,
+                parent: 'all'
+            }
+        }))
+
+        localStorage.setItem(RECENT_INPUT_LANGUAGES, JSON.stringify(recentlyUsed))
+        setItems(langItems);
+    }
+
     return (
         <LanguageBar>
             <DropdownItem>
                 <DropDownPicker
+                    listParentLabelStyle={{
+                        fontWeight: "bold"
+                    }}
+                    categorySelectable={false}
+                    searchable={true}
                     style={{
                         backgroundColor: '#FAFAFA',
                         border: '1px solid rgba(158, 158, 158, .25)'
@@ -43,10 +82,20 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setInputLanguageValue}
                     setItems={setItems}
                     onOpen={onInputLanguageOpen}
+                    closeAfterSelecting={true}
+                    onSelectItem={onSelectItem}
                 />
             </DropdownItem>
             <DropdownItem>
                 <DropDownPicker
+                    listParentLabelStyle={{
+                        fontWeight: "bold"
+                    }}
+                    listChildLabelStyle={{
+                        color: "grey"
+                    }}
+                    categorySelectable={false}
+                    searchable={true}
                     style={{
                         backgroundColor: '#FAFAFA',
                         border: '1px solid rgba(158, 158, 158, .25)'
@@ -58,6 +107,7 @@ export const LanguagePicker = ({languageItems}) => {
                     setValue={setOutputLanguageValue}
                     setItems={setItems}
                     onOpen={onOutputLanguageOpen}
+                    onSelectItem={onSelectItem}
                 />
             </DropdownItem>
         </LanguageBar>

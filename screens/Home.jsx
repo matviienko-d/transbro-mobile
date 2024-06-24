@@ -11,6 +11,7 @@ import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 import {LANGUAGES_ITEMS_LIST} from "../mocks/languages";
 import Feather from '@expo/vector-icons/Feather';
 import Clipboard from '@react-native-clipboard/clipboard';
+import {RECENT_INPUT_LANGUAGES} from "../configs/language-picker";
 
 const Logo = styled.Text`
     fontSize: 25px;
@@ -113,7 +114,8 @@ export const Home = () => {
             setTimeout(() => resolve(LANGUAGES_ITEMS_LIST), 1000)
         })
             .then(({data: {translation}}) => {
-                setLanguageItems(convertLanguageItemsToList(translation));
+                let languageItems = convertLanguageItemsToList(translation, JSON.parse(localStorage.getItem(RECENT_INPUT_LANGUAGES)) ?? []);
+                setLanguageItems(languageItems);
             })
             .catch((error) => {
                 console.error(error);
