@@ -3,6 +3,8 @@ import DropDownPicker from "react-native-dropdown-picker";
 import styled from "styled-components/native";
 import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 import {RECENT_INPUT_LANGUAGES} from "../configs/language-picker";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
 
 const LanguageBar = styled.View`
   justifyContent: space-between;
@@ -13,6 +15,15 @@ const LanguageBar = styled.View`
 
 const DropdownItem = styled.View`
   width: 43%;
+`;
+
+const SwitchLanguagesIcon = styled.View`
+    cursor: pointer;
+    flex-wrap: wrap;
+    flex: 1;
+    height: 100%;
+    align-content: center;
+    justify-content: center;
 `;
 
 export const LanguagePicker = ({languageItems}) => {
@@ -28,6 +39,13 @@ export const LanguagePicker = ({languageItems}) => {
     const onOutputLanguageOpen = () => {
         setInputLanguageOpen(false);
     };
+
+    const switchLanguages = () => {
+        setOutputLanguageOpen(false);
+        setInputLanguageOpen(false);
+        setInputLanguageValue(outputLanguageValue);
+        setOutputLanguageValue(inputLanguageValue);
+    }
 
     const onSelectItem = (languageItem) => {
         const storedRecentlyUsed = JSON.parse(localStorage.getItem(RECENT_INPUT_LANGUAGES))
@@ -86,6 +104,9 @@ export const LanguagePicker = ({languageItems}) => {
                     onSelectItem={onSelectItem}
                 />
             </DropdownItem>
+            <SwitchLanguagesIcon >
+                <FontAwesome6 name="arrows-rotate" size={24} color="black" onPress={switchLanguages}/>
+            </SwitchLanguagesIcon>
             <DropdownItem>
                 <DropDownPicker
                     listParentLabelStyle={{
