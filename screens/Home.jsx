@@ -7,11 +7,12 @@ import styled from "styled-components/native";
 import {LanguagePicker} from "../components/LanguagePicker";
 import debounce from "lodash.debounce";
 import {convertLanguageItemsToList} from "../utils/language-items";
-import {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
+import ActiveLanguagesProvider, {activeLanguagesContext} from "../providers/ActiveLanguagesProvider";
 import {LANGUAGES_ITEMS_LIST} from "../mocks/languages";
 import Feather from '@expo/vector-icons/Feather';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {RECENT_INPUT_LANGUAGES} from "../configs/language-picker";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const Logo = styled.Text`
     fontSize: 25px;
@@ -92,7 +93,15 @@ const InputTextActionIcon = styled.View`
     top: 15px;
 `;
 
-export const Home = () => {
+const AddToPhrasebookIcon = styled.View`
+    cursor: pointer;
+    position: absolute;
+    width: max-content;
+    right: 55px;
+    top: 15px;
+`;
+
+export const Home = ({navigation}) => {
     const [isLoading, setLoading] = useState(false);
     const [languageItems, setLanguageItems] = useState([]);
     const [textToTranslate, setTextToTranslate] = useState('');
@@ -178,6 +187,16 @@ export const Home = () => {
         Clipboard.setString(translatedText);
     }
 
+    const addToPhraseBook = () => {
+        const phrasesLanguageKey = [`${inputLanguageValue}-${outputLanguageValue}`];
+        const phraseBookPhrases =   JSON.parse(localStorage.getItem('phrase-book'));
+        localStorage.setItem(`phrase-book`, JSON.stringify({
+                ...(phraseBookPhrases ?? {}),
+                [phrasesLanguageKey]: [{textToTranslate, translatedText}, ...(phraseBookPhrases?.[phrasesLanguageKey] ?? [])]
+            })
+        );
+    }
+
     useEffect(fetchLanguageItems, []);
 
     useEffect(() => {
@@ -192,6 +211,9 @@ export const Home = () => {
         <SafeAreaView style={{flex: 1}}>
             <MainView>
                 <Header>
+                    <InputTextActionIcon>
+                        <Feather name="book" size={24} color="black" onPress={() => navigation.navigate('Phrasebook')}/>
+                    </InputTextActionIcon>
                     <Logo>transbro</Logo>
                     <View>
                         {
@@ -229,9 +251,15 @@ export const Home = () => {
                         : <OutputArea>
                             {
                                 translatedText
-                                    ? <InputTextActionIcon>
-                                        <Feather name="copy" size={24} color="black" onPress={copyTranslatedText}/>
-                                    </InputTextActionIcon>
+                                    ? <>
+                                        <InputTextActionIcon>
+                                            <Feather name="copy" size={24} color="black" onPress={copyTranslatedText}/>
+                                        </InputTextActionIcon>
+                                        <AddToPhrasebookIcon>
+                                            <AntDesign name="pluscircleo" size={24} color="black"
+                                                       onPress={addToPhraseBook}/>
+                                        </AddToPhrasebookIcon>
+                                    </>
                                     : null
                             }
                             <TranslationResultText
