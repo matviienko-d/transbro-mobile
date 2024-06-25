@@ -104,7 +104,7 @@ export const LanguagePicker = ({languageItems}) => {
                     onSelectItem={onSelectItem}
                 />
             </DropdownItem>
-            <SwitchLanguagesIcon >
+            <SwitchLanguagesIcon>
                 <FontAwesome6 name="arrows-rotate" size={24} color="black" onPress={switchLanguages}/>
             </SwitchLanguagesIcon>
             <DropdownItem>
